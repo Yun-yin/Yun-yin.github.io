@@ -1,0 +1,275 @@
+---
+title: "Brief Introduction to PCA"
+author: "Longxiao"
+date: "2025-01-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here we use a simulated dataset to illustrate the process of Principal Component Analysis (PCA). The original data is three-dimensional, and it was simulated based on a plane described by $z = 2x+3y$, with some added random noise. As a result, this dataset can be assumed to lie in a two-dimensional space, with two independent vectors defining the surface.
+
+```{r, warning=FALSE}
+# Load necessary libraries
+library(ggplot2)
+library(scatterplot3d)
+
+# Set the seed for random number generation
+set.seed(123)
+
+# Number of samples (data points) to generate
+n_samples <- 20
+
+# Generate n_samples random numbers for x and y in the range [-1, 1] from a uniform distribution
+x <- runif(n_samples, -1, 1)
+y <- runif(n_samples, -1, 1)
+
+# Define a plane equation z = 2 * x + 3 * y
+
+# z0 represents the ideal values for z without any noise
+z0 <- 2 * x + 3 * y 
+# Generate random noise with mean 0 and standard deviation 1
+z <- z0 + rnorm(n_samples, mean = 0, sd = 1)
+
+# Combine x, y, and z
+data_3D <- data.frame(x, y, z)
+
+head(data_3D)
+```
+
+By visualizing the data, we can observe that the 20 data points are roughly distributed around the plane.
+
+```{r}
+s3d <- scatterplot3d(data_3D$x, data_3D$y, data_3D$z, 
+              color = "blue", pch = 16, 
+              main = "Original 3D Data", 
+              xlab = "X Axis", ylab = "Y Axis", zlab = "Z Axis")
+
+s3d$plane3d(Intercept = 0, x.coef = 2, y.coef = 3, col = "lightblue", lty = 2, lwd = 1.2)
+```
+
+Then, by PCA analysis, the data is reduced to two dimensions.
+
+```{r}
+pca_result <- prcomp(data_3D, center = TRUE, scale. = FALSE)
+
+data_2D <- as.data.frame(pca_result$x[, 1:2])
+colnames(data_2D) <- c("PC1", "PC2")
+
+ggplot(data_2D, aes(x = PC1, y = PC2)) +
+  geom_point(color = "red", alpha = 2) +
+  ggtitle("PCA Reduced 2D Data") +
+  xlab("Principal Component 1") +
+  ylab("Principal Component 2") +
+  theme_minimal()
+```
+
+but...
+
+```{r}
+data0 <- data.frame(x, y, z0)
+
+# Define two vectors (v_x and v_y) that lie on the plane in 3D space.
+v_x <- c(-0.1, 0, -0.2)
+v_y <- c(0, -0.1, -0.3)
+
+# Create a transformation matrix by the two vectors v_x and v_y
+transformation_matrix <- cbind(v_x, v_y)[1:2, ]
+
+# Apply the linear transformation to the original data
+transformed_data <- data.frame(
+  x_transformed = data0$x * v_x[1] + data0$y * v_y[1],
+  y_transformed = data0$x * v_x[2] + data0$y * v_y[2] )
+
+ggplot(transformed_data, aes(x = x_transformed, y = y_transformed)) +
+  geom_point(color = "blue") +
+  labs(title = "2D Visualization of Data after Linear Transformation", x = "Transformed X", y = "Transformed Y") +
+  theme_minimal()
+```
+
+they are quite differnet!
+
+We perform the PCA step by step.
+
+## 1. standardization
+
+$$
+Z_{ij} = \frac{X_{ij} - \mu_{j}}{\sigma_{j}}
+$$
+
+where $i$ is the order of data, $j$ is the dimension.
+
+```{r}
+data_standardized <- scale(data_3D)
+head(data_standardized)
+```
+
+## 2. covariance matrix
+
+$$
+Cov = \frac{1}{n-1} X^T X
+$$
+
+```{r}
+cov_matrix <- cov(data_standardized)
+
+cov_matrix
+```
+
+## 3. eigenvalue and eigenvector of the cov matrix
+
+$$
+Cv = \lambda v
+$$
+
+```{r}
+eigen_result <- eigen(cov_matrix)
+eigenvalues <- eigen_result$values
+eigenvectors <- eigen_result$vectors
+
+eigen_result
+```
+
+## 4. choose dimensions
+
+```{r}
+sorted_indices <- order(eigenvalues, decreasing = TRUE)
+top_2_eigenvectors <- eigenvectors[, sorted_indices[1:2]]
+
+sorted_indices
+```
+
+Here are the two eigenvectors we selected (red and green), with a set of independent vectors that lie on the plane (dark red $(1,0,2)$ and dark green $(0.6,-0.5,-0.3)$).
+
+```{r}
+s3d <- scatterplot3d(data_3D$x, data_3D$y, data_3D$z,
+                     color = "blue", pch = 16, 
+                     main = "3D Data with PCA Components",
+                     xlab = "X Axis", ylab = "Y Axis", zlab = "Z Axis")
+
+s3d$plane3d(Intercept = 0, x.coef = 2, y.coef = 3, col = "lightblue", lty = 2, lwd = 1.2)
+
+s3d$points3d(c(0, top_2_eigenvectors[1, 1]), 
+             c(0, top_2_eigenvectors[2, 1]), 
+             c(0, top_2_eigenvectors[3, 1]), 
+             col = "red", type = "l", lwd = 2)
+
+s3d$points3d(c(0, top_2_eigenvectors[1, 2]), 
+             c(0, top_2_eigenvectors[2, 2]), 
+             c(0, top_2_eigenvectors[3, 2]), 
+             col = "green", type = "l", lwd = 2)
+
+s3d$points3d(c(0, 0.6), 
+             c(0, 0), 
+             c(0, 1.2), 
+             col = "darkred", type = "l", lwd = 5)
+
+s3d$points3d(c(0, 0.6), 
+             c(0, -0.5), 
+             c(0, 0.3), 
+             col = "darkgreen", type = "l", lwd = 5)
+
+s3d$points3d(data_3D$x, data_3D$y, data_3D$z, col = "blue", pch = 16)
+```
+
+## 5. Mapping the data to the new space
+
+```{r}
+pca_result <- data_standardized %*% top_2_eigenvectors
+
+head(pca_result)
+```
+
+```{r}
+data_2D <- as.data.frame(pca_result[, 1:2])
+colnames(data_2D) <- c("PC1", "PC2")
+
+ggplot(data_2D, aes(x = PC1, y = PC2)) +
+  geom_point(color = "red", alpha = 5) +
+  ggtitle("PCA Reduced 2D Data") +
+  xlab("Principal Component 1") +
+  ylab("Principal Component 2") +
+  theme_minimal()
+```
+
+Here we could explore more about the sample size and data noise (which is the variance $\sigma$ here).
+
+```{r}
+pca_test<-function(n,sigma){
+  n_samples <- n
+  x <- runif(n_samples, -1, 1)  
+  y <- runif(n_samples, -1, 1)
+  z0 <- 2 * x + 3 * y 
+  z <- z0 + rnorm(n_samples, mean = 0, sd = sigma)
+  data_3D <- data.frame(x, y, z)
+  
+  v_x <- c(-0.1, 0, -0.2)
+  v_y <- c(0, -0.1, -0.3)
+  
+  data_standardized <- scale(data_3D)
+  cov_matrix <- cov(data_standardized)
+  eigen_result <- eigen(cov_matrix)
+  eigenvalues <- eigen_result$values
+  eigenvectors <- eigen_result$vectors
+  
+  sorted_indices <- order(eigenvalues, decreasing = TRUE)
+  top_2_eigenvectors <- eigenvectors[, sorted_indices[1:2]]
+  
+  s3d <- scatterplot3d(data_3D$x, data_3D$y, data_3D$z,
+                     color = "blue", pch = 16, 
+                     main = "3D Data with PCA Components",
+                     xlab = "X Axis", ylab = "Y Axis", zlab = "Z Axis", type = "n")
+
+s3d$plane3d(Intercept = 0, x.coef = 2, y.coef = 3, col = "lightblue", lty = 2, lwd = 1.2)
+
+s3d$points3d(c(0, top_2_eigenvectors[1, 1]), 
+             c(0, top_2_eigenvectors[2, 1]), 
+             c(0, top_2_eigenvectors[3, 1]), 
+             col = "red", type = "l", lwd = 2)
+
+s3d$points3d(c(0, top_2_eigenvectors[1, 2]), 
+             c(0, top_2_eigenvectors[2, 2]), 
+             c(0, top_2_eigenvectors[3, 2]), 
+             col = "green", type = "l", lwd = 2)
+
+s3d$points3d(c(0, 0.6), 
+             c(0, 0), 
+             c(0, 1.2), 
+             col = "darkred", type = "l", lwd = 5)
+
+s3d$points3d(c(0, 0.6), 
+             c(0, -0.5), 
+             c(0, -0.3), 
+             col = "darkgreen", type = "l", lwd = 5)
+
+s3d$points3d(data_3D$x, data_3D$y, data_3D$z, col = "blue", pch = 16, type = "n")
+}
+```
+
+```{r}
+#set.seed(2)
+pca_test(10000,1)
+```
+
+```{r}
+#set.seed(2)
+pca_test(10000,1)
+```
+
+```{r}
+pca_test(10000,1)
+```
+
+```{r}
+pca_test(10,1)
+```
+
+```{r}
+pca_test(10,1)
+```
+
+```{r}
+pca_test(10,1)
+```
