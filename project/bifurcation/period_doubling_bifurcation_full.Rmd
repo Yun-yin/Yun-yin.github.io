@@ -1,0 +1,696 @@
+---
+title: "Period-Doubling Bifurcation"
+author: "Longxiao"
+date: "2023-04-16"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: readable
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+> This is a demonstration of **period-doubling bifurcations**. Here, I
+> demonstrate how period-doubling bifurcations emerge in a logistic
+> population growth model as the intrinsic growth rate varies, using R
+> for simulation. For the formulation of the simplified logistic model
+> and the emergence of period-doubling bifurcations in population
+> growth, refer to May’s classic paper [*Biological Populations with
+> Nonoverlapping Generations: Stable Points, Stable Cycles, and
+> Chaos*](https://www.science.org/doi/10.1126/science.186.4164.645).
+
+In a dynamical system, the emergence of *chaos* is closely related to
+**period-doubling bifurcations** that occur as system parameters change.
+Simply put, as the parameter varies, the stable state of the system
+bifurcates, eventually leading to chaos once a certain threshold is
+reached. We begin with the simplest system that exhibits period-doubling
+bifurcations, studying the dynamical characteristics of a difference
+equation with a quadratic term, and attempt to understand the nature of
+period-doubling bifurcations.
+
+# Logistic Growth of a Population
+
+The story begins with a classic question in theoretical biology and
+ecology: How does a population change over time?
+
+Consider a model where there is no generation overlap, and individuals
+are born and die at constant rates $g$ and $b$, respectively. The
+population grows at a constant rate $r = g - b$. A difference equation
+with only a linear term (which behaves simply) is used to describe the
+dynamics of such a model:
+
+$$
+N_t = r N_{t-1} \tag{1}
+$$
+
+We could simulate this system from $N_0 = 0.6$, with different intrinsic
+rate $r = 0.6,-0.6,2,-2$ (include values that are positive or negative,
+larger than $1$ or not, notice if $r = 1$ then $N_t = N_0$ for all $t$).
+
+```{r}
+Tt=15
+r=c(0.6,-0.6,2,-2)
+N0=0.6
+
+SDF<-function(r,N0){
+  N<-integer(Tt)
+  N[1]=N0
+  for(i in 2:Tt){
+  N[i]=r*N[i-1]
+  }
+  return(N)
+}
+
+par(mfrow=c(2,2),pin=c(3,1))
+
+for (j in r) {
+  N<-SDF(j,N0)
+  plot(c(1:Tt),N,type = "o")
+  ptext<-paste("r=",j,"N0=",N0)
+  abline(h=0,col="red")
+  text(1,(600*abs(j)-359.5),pos= 4,ptext)
+}
+```
+
+Or, we could simulate with different initial population size:
+
+```{r}
+Tt=15
+r=2
+N0=c(0.6,-0.6,2,-2)
+
+par(mfrow=c(2,2),pin=c(3,1))
+
+for (j in N0) {
+  N<-SDF(r,j)
+  plot(c(1:Tt),N,type = "o")
+  ptext<-paste("r=",r,"N0=",j)
+  abline(h=0,col="red")
+  text(1,2000*j,pos= 4,ptext)
+}
+```
+
+The system either diverges to infinity or converges to zero depending on
+the initial state and the value of the growth rate parameter. When the
+initial value and the growth rate have opposite signs, fluctuations may
+occur, but the trend remains unchanged. Overall, the behavior is
+monotonic and predictable.
+
+With a continuous time, the system could also be modeled by a difference
+equation:
+
+$$
+\frac{dN}{dt} = rN
+$$
+
+which has a solution $N_t = Ce^{rt}$. The differential equation looks
+like ($r=2$, $N_0 = 0.01$, $t \in (1,8)$):
+
+```{r}
+r<-2
+T1<-8
+delta_t<-0.001
+t<-seq(from = 0, to = T1, by = delta_t)
+N0<-0.01
+
+N<-integer(length(t)) #vector of population size
+N[1]=N0       #initial population size N_0
+
+for(i in 2:length(t)){
+  N[i]=N[i-1]+delta_t*r*N[i-1]  #iterate function
+}
+  
+logi_map<-cbind(t,N)
+names(logi_map)<-c("t","N")
+plot(logi_map, pch = ".")
+```
+
+However, a real population typically cannot grow at a constant rate, as
+there are various limitations such as nutrition, space, and other
+resources. As a result, we introduce an environmental capacity $K$ into
+the model, which represents the maximum population size that can be
+sustained by the environment:
+
+$$
+N_t = rN_{t-1}\left(1 - \frac{N_{t-1}}{K}\right) \tag{2}
+$$
+
+Here, $N_t$ represents the population size at time $t$, $r$ is the
+intrinsic growth rate of the population, and $K$ is the environmental
+capacity. With a simple transformation, the equation can be rewritten
+into a general form for this class of models:
+
+$$
+N_t = rN_{t-1}(1 - N_{t-1}) \tag{3}
+$$
+
+Note that the system's dynamics are now governed by a single parameter
+$r$.
+
+> The transformation from Equation (2) to Equation (3) removes the
+> dimensional units, making the dynamical properties clearer and more
+> concise. (The specific transformation can be skipped.) $$
+> \text{Let: } a_t = \frac{N_t}{K} \\
+> a_t = ra_{t-1}(1 - a_{t-1}')
+> $$
+>
+> which is the same form as Equation (3).
+
+It is easy to see that under the given constraints: $N_t$ lies within
+the interval [0, 1] (meaning the population size is positive and does
+not exceed the environmental carrying capacity), and $r$ is greater than
+zero (indicating population growth). Equation (3) has a fixed point:
+
+$$
+N^* = rN^*(1 - N^*)
+$$
+
+Solving for $a$ gives:
+
+$$
+N^* = 1 - \frac{1}{r} \tag{4}
+$$
+
+When the value of $r$ is relatively small, the system will converge to
+the fixed point regardless of the initial value.
+
+```{r}
+Tt<-20
+r<-2
+N0<-c(0.01,0.3,0.5,0.8)
+Nt<-length(N0)
+N<-integer(Tt)
+
+par(mfrow=c(2,2),pin=c(8,6))
+
+for (j in N0) {
+  N[1]=j
+for(i in 2:Tt){
+  N[i]=r*N[i-1]*(1-N[i-1])
+}
+t<-c(1:Tt)
+par(pin=c(1.8,1.2))
+plot(t,N,type = "o",ylim = c(0,1),yaxp = c(0,1,10))
+abline(h=0.5,lwd=0.5,col="red")
+ptext<-paste("N0=",j)
+  text(0.5,0.8,pos= 4,ptext)
+}
+
+```
+
+With smaller initial values $N_0$, the system exhibits behavior
+characteristic of nonlinearity. Followed equation(4), the fixed point
+should exist with all $r > 1$. But the system will not always converge
+when the $r$ is getting large. We will discuss it later.
+
+Under continuous-time conditions, this model is known as **logistic
+growth**, described by the following equation:
+
+$$
+\frac{dN}{dt} = rN(1 - N)
+$$
+
+```{r}
+r<-2
+T1<-8
+delta_t<-0.001
+t<-seq(from = 0, to = T1, by = delta_t)
+N0<-0.01
+
+N<-integer(length(t)) #vector of population size
+N[1]=N0       #initial population size N_0
+
+for(i in 2:length(t)){
+  N[i]=N[i-1]+delta_t*r*N[i-1]*(1-N[i-1])  #iterate function
+}
+  
+logi_map<-cbind(t,N)
+names(logi_map)<-c("t","N")
+plot(logi_map, pch = ".")
+```
+
+# Period-Doubling Bifurcations
+
+Now it is time to discuss the complex dynamics of the logistic model
+with larger $r$. The exponential growth model has very simple behavior.
+When we introduce a quadratic term into the system (as logistic model),
+the situation seems not change significantly. However, as we gradually
+increase the value of the growth parameter $r$, the state of the system
+also changes accordingly:
+
+We simulate the discrete-time logistic model with
+$r = 0.8,2.5,3.2,3.5,3.55,3.6,3.99,4.1$
+
+```{r}
+Tt=50 #迭代次数
+r=c(0.8,2.5,3.2,3.5,3.55,3.6,3.99,4.1) #增长率参数
+N0=0.5 #初始值
+
+N<-integer(Tt) #种群数量
+
+par(mfrow=c(4,2))
+
+for (j in r) {
+  for(i in 2:Tt){
+    N[1]=N0
+    N[i]=j*N[i-1]*(1-N[i-1])
+  }
+  t<-c(1:Tt)
+  par(pin=c(2.5,0.7))
+  plot(t,N,type = "o",ylim = c(0,1),yaxp = c(0,1,10))
+  abline(h=max((1-1/j),0),col="red")
+  ptext<-paste("r=",j)
+  text(0.5,0.1,pos= 4,ptext,col="red")
+}
+```
+
+Although the system still tends to approach the fixed point in the long
+run, it sometimes fails to reach it precisely and instead begins to
+oscillate. And once the $r$ is getting much larger, it is even hard to
+notice the oscillation. As the value of $r$ continues to increase, the
+nature of the system's long-term fluctuations also changes.
+
+It becomes evident that the period of these fluctuations varies with
+$r$. In other words, the final state of the system—and how many such
+states exist—depends on the value of $r$ (for example, $2$ when
+$r = 3.2$, $4$ when $r = 3.5$). Also, we can notice that the number of
+different state seems follows the series $n = 2^k$.
+
+We can visualize the positions of the system's final states for
+different values of $r$ in a diagram:
+
+```{r}
+
+logistic_ref<-function(r,N){
+  return(r*N*(1-N))
+} #logistic map
+  
+par_map<-function(r,N0,t,k,func){
+  N<-integer(t) #population size 
+  N[1]=N0       #initial population
+
+  a0<-as.data.frame(matrix(nrow = 0, ncol = 2)) 
+  #dataframe of r-N*
+
+  for (j in r) {
+    for(i in 2:t){
+      N[i]=func(j,N[i-1])
+    }
+    a<-cbind(rep(j,k),N[(t-k+1):t])
+    a0<-rbind(a0,a)
+  }
+  names(a0)<-c("r","N")
+  return(a0)
+}
+```
+
+```{r}
+r=c(0.8,2.5,3.2,3.5,3.55,3.6,3.99,4.1) #r, intrinsic rate
+N0=0.6 #initial population size
+t=1000 #iterate times
+k=100 #number of kept final state
+
+ap1<-par_map(r,N0,t,k,logistic_ref)
+plot(ap1,pch=20,cex = 1)
+
+abline(v=r[1:7],col="red")
+
+```
+
+Next, we sample the parameter $r$ more densely and again plot the system
+states. We can clearly observe the bifurcation of system states. The
+system transitions from a single stable point, to oscillations between
+two states, then four states, with increasingly longer periods, and
+eventually enters an aperiodic chaotic regime.
+
+```{r}
+r=seq(from = 0.8, to = 4.1, by = 0.05)
+N0=0.6
+t=500
+k=100
+
+ap2<-par_map(r,N0,t,k,logistic_ref)
+plot(ap2,pch=20,cex = 1)
+
+```
+
+```{r}
+r=seq(from = 0.8, to = 4.1, by = 0.001)
+N0=0.6
+t=500
+k=100
+
+a0<-par_map(r,N0,t,k,logistic_ref)
+plot(a0,pch = ".")
+```
+
+> Another way to generate a bifurcation diagram is by iterating from a
+> single initial state. The transitions between different periodic
+> behaviors appear rougher compared to the diagram above, which also
+> depends on the resolution of the simulation.
+
+```{r}
+t<-200000
+r<-seq(from=1.0, to=4.0, length.out=t)
+N0<-0.01
+
+N<-integer(t)
+N[1]=N0
+  
+for (i in 2:t) {
+    N[i]=r[i]*N[i-1]*(1-N[i-1])
+  }
+b<-cbind(r,N)
+plot(b,pch = ".")
+```
+
+```{r}
+t<-100000
+r<-seq(from=0.5, to=4.0, length.out=t)
+N0<-0.6
+
+N<-integer(t) 
+N[1]=N0       
+  
+for (i in 2:t) {
+    N[i]=r[i]*N[i-1]*(1-N[i-1]) 
+  }
+b<-cbind(r,N)
+plot(b,pch = ".")
+```
+
+# Basic Analysis
+
+## Feigenbaum Constants: pattern of bifurcations
+
+In period-doubling bifurcations, the period of oscillations doubles as
+the parameter increases. We then search for the parameter values at
+which state transitions occur, and investigate their underlying pattern.
+
+```{r}
+f <- 6 # Number of bifurcations to find
+period <- 2 # Minimum period
+cycle2 <- integer(f + 1)
+t = 2000 # Number of iterations
+N0 = 0.6 # Initial value
+
+pointfind <- function(r, num_point) {
+  # r is the logistic map parameter, num_point is the period size to search for
+  
+  N <- integer(t) # Population size
+  N[1] = N0       # Initial population size
+  
+  for (i in 2:t) {
+    N[i] = logistic_ref(r, N[i-1]) # Logistic mapping, iterating to get population size changes
+  }
+  
+  if (abs(N[t] - N[t - num_point]) > 0.000001) return(1)
+  # Check if it has a cycle, i.e., whether the population size is equal for the specified period
+  # Since it is only approaching the limit cycle, the values do not need to be exactly equal, they just need to be very close
+  # Return 1 if no cycle is found
+  else return(0)
+}
+
+lr <- 0 # Left boundary
+rr <- 4 # Right boundary
+
+for (m in 0:f) {
+  # m is the number of bifurcations on the left side, 2^m is the number of bifurcations on the left
+  while ((rr - lr) > 0.0000001) {
+    midr <- ((rr + lr) / 2) # Middle value of the current interval
+    if (pointfind(midr, (period^m)) == 1) rr <- midr
+    # If the cycle at the middle value is not the bifurcation left cycle, the middle value is in the bifurcation right side
+    else lr <- midr
+    # Otherwise, the middle value is on the bifurcation left side
+  }
+  cycle2[m + 1] <- midr # Found the bifurcation point
+  rr <- 4 # Reset the right boundary to 4, left boundary remains the same
+}
+# Use binary search to find the bifurcation points
+
+print(cycle2)
+```
+
+It seems that these values are converge to a value close to $3.57$,
+which suggest that there is a limitation for period-doubling
+bifurcations. Just like in the diagram, the red lines for period
+doubling getting dense.
+
+```{r}
+plot(a0,pch = ".")
+abline(v=1,lwd=0.5,col="red")
+for (i in cycle2) {
+  abline(v=i,lwd=0.5,col="red")
+}
+```
+
+To find more patterns, we calculate the interval of period doubling:
+
+```{r}
+c2_gap<-integer(f+1)
+c2_gap[1]<-cycle2[1]-1
+for (i in 2:(f+1)) {
+    c2_gap[i]<-cycle2[i]-cycle2[i-1]
+}
+print(c2_gap)
+
+c2_gaprate<-integer(f)
+for (i in 1:f) {
+    c2_gaprate[i]<-c2_gap[i]/c2_gap[i+1]
+}
+print(c2_gaprate)
+```
+
+By roughly simulation and calculation, the value of parameter $r$ for
+period doubling seems a geometric sequence, with common ratio around
+$4.6$.
+
+```{r}
+fit<-lm(c2_gaprate ~ 1)
+summary(fit)
+```
+
+We then fit the sequence to a linear model. The estimation of common
+ratio is $4.6158\pm0.0539$. Actually, This value is called ***Feigenbaum
+Constants***, $\delta$, which is a general constant in the world of
+chaos, refers to [Quantitative universality for a class of nonlinear
+transformations](https://doi.org/10.1007/BF01020332).
+
+```{r}
+boxplot(c2_gaprate)
+F_cons<-4.669201609  #Feigenbaum Constants
+abline(h = fit$coefficients,lwd=2, col="red")
+abline(h = F_cons,lwd=2, col="blue")
+```
+
+Our estimation is close to Feigenbaum Constant. And based on the
+Feigenbaum Constant, we could calculate the upper bound of $r$ for
+period doubling area ($\sim 3.545$).
+
+```{r}
+c2_gap0<-2
+c2_total0<-1+c2_gap0*(F_cons/(F_cons-1))
+print(c2_total0)
+c2_total1<-1+c2_gap[1]*(fit$coefficients/(fit$coefficients-1))
+print(c2_total1)
+```
+
+```{r}
+plot(a0,pch = ".")
+abline(v=1,lwd=0.5,col="red")
+for (i in cycle2) {
+  abline(v=i,lwd=0.5,col="red")
+}
+abline(v=c2_total1,col="blue")
+```
+
+## Fractal Features
+
+Each branch of the bifurcation shows a similar pattern, which is closely
+related to fractal feature. Here we showed some parts of the above
+period-doubling bifurcation.
+
+```{r}
+t=1000
+N0=0.6
+k=200
+r_b1=seq(from = 2.95, to = 3.6, by = 0.0005)
+map_b1<-par_map(r_b1,N0,t,k,logistic_ref)
+plot(map_b1,pch = ".")
+```
+
+```{r}
+t=1000 #迭代次数
+N0=0.6 #初始值
+k=200 #绘图保留次数
+r1=seq(from = 3.62, to = 3.64, by = 0.00004) 
+r2=seq(from = 3.73, to = 3.75, by = 0.00004) 
+r3=seq(from = 3.82, to = 3.88, by = 0.00004) 
+
+map1<-par_map(r1,N0,t,k,logistic_ref)
+map2<-par_map(r2,N0,t,k,logistic_ref)
+map3<-par_map(r3,N0,t,k,logistic_ref)
+```
+
+```{r}
+layout(matrix(c(1,2,3),1,3,byrow = T),widths = c(1,1,2.4))
+plot(map1,pch = ".")
+plot(map2,pch = ".")
+plot(map3,pch = ".")
+```
+
+## Chaos and Initial Condition Sensitivity
+
+The upper bound of period bifurcation suggest chaos with larger $r$.
+Again, we simulated the system with different $r$, but also with two
+close initial state.
+
+```{r}
+Tt=20 #迭代次数
+r=c(2.5,3.2,3.5,3.9) #增长率参数
+N0=0.5 #初始值
+l=0.01
+
+N<-integer(Tt) #种群数量
+N1<-integer(Tt)
+
+par(mfrow=c(2,2))
+
+for (j in r) {
+  for(i in 2:Tt){
+    N[1]=N0
+    N1[1]<-N[1]-l
+    N[i]=j*N[i-1]*(1-N[i-1])
+    N1[i]=j*N1[i-1]*(1-N1[i-1])
+  }
+  t<-c(1:Tt)
+  plot(t,N,type = "l",ylim = c(0,1),yaxp = c(0,1,10))
+  lines(t,N1,col="red")
+  ptext<-paste("r=",j)
+  text(0.5,0.1,pos= 4,ptext,col="red")
+}
+```
+
+As we can see here, when the $r$ is larger, the system dynamics is
+sensitive with initial state, and the error becomes unpredictable. We
+call this kind of phenomena ***chaos***.
+
+```{r}
+Tt=50
+r=3.9
+N0=0.5
+l=0.001
+
+N<-integer(Tt)
+N1<-integer(Tt)
+N2<-integer(Tt)
+
+N[1]=N0
+N1[1]<-N[1]-l
+N2[1]<-N[1]-2*l
+for(i in 2:Tt){
+  N[i]=r*N[i-1]*(1-N[i-1])
+  N1[i]=r*N1[i-1]*(1-N1[i-1])
+  N2[i]=r*N2[i-1]*(1-N2[i-1])
+}
+t<-c(1:Tt)
+
+plot(t,N,type = "l",col="green",lwd = 2,ylim = c(0,1),yaxp = c(0,1,10),)
+lines(t,N1,col="blue",lwd = 2)
+lines(t,N2,lwd = 2)
+
+ptext<-paste("r=",j)
+text(0.5,0.05,pos= 4,ptext,col="red")
+```
+
+# Another example
+
+Not only the logistic map have such an amazing property. Actually, other
+nonlinear functions could also work. For example, the sine function
+mapping:
+
+```{r}
+sin_map<-function(r,N){
+  return(r*sin(N))
+} #logistic map
+
+r=seq(from = 0.8, to = 4.1, by = 0.001)
+N0=0.6
+t=500
+k=100
+
+b0<-par_map(r,N0,t,k,sin_map)
+plot(b0,pch = ".")
+```
+
+```{r}
+f <- 6 # Number of bifurcations to find
+period <- 2 # Minimum period
+cycle3 <- integer(f + 1)
+t = 2000 # Number of iterations
+N0 = 0.6 # Initial value
+
+pointfind <- function(r, num_point) {
+  # r is the logistic map parameter, num_point is the period size to search for
+  
+  N <- integer(t) # Population size
+  N[1] = N0       # Initial population size
+  
+  for (i in 2:t) {
+    N[i] = sin_map(r, N[i-1]) # Logistic mapping, iterating to get population size changes
+  }
+  
+  if (abs(N[t] - N[t - num_point]) > 0.000001) return(1)
+  # Check if it has a cycle, i.e., whether the population size is equal for the specified period
+  # Since it is only approaching the limit cycle, the values do not need to be exactly equal, they just need to be very close
+  # Return 1 if no cycle is found
+  else return(0)
+}
+
+lr <- 0 # Left boundary
+rr <- 4 # Right boundary
+
+for (m in 0:f) {
+  # m is the number of bifurcations on the left side, 2^m is the number of bifurcations on the left
+  while ((rr - lr) > 0.0000001) {
+    midr <- ((rr + lr) / 2) # Middle value of the current interval
+    if (pointfind(midr, (period^m)) == 1) rr <- midr
+    # If the cycle at the middle value is not the bifurcation left cycle, the middle value is in the bifurcation right side
+    else lr <- midr
+    # Otherwise, the middle value is on the bifurcation left side
+  }
+  cycle3[m + 1] <- midr # Found the bifurcation point
+  rr <- 4 # Reset the right boundary to 4, left boundary remains the same
+}
+# Use binary search to find the bifurcation points
+
+print(cycle3)
+```
+
+```{r}
+c3_gap<-integer(f+1)
+c3_gap[1]<-cycle3[1]-1
+for (i in 2:(f+1)) {
+    c3_gap[i]<-cycle3[i]-cycle3[i-1]
+}
+
+c3_gaprate<-integer(f)
+for (i in 1:f) {
+    c3_gaprate[i]<-c3_gap[i]/c3_gap[i+1]
+}
+print(c3_gaprate)
+```
+
+```{r}
+fit<-lm(c3_gaprate ~ 1)
+summary(fit)
+```
+
+And we can also draw Feigenbaum Constant.
