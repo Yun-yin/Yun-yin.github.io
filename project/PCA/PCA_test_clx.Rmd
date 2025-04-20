@@ -2,7 +2,15 @@
 title: "Brief Introduction to PCA"
 author: "Longxiao"
 date: "2025-01-30"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: readable
+editor_options:
+  markdown:
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
