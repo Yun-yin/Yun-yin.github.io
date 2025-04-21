@@ -1,0 +1,252 @@
+---
+title: "planar_graph_forest"
+author: "Longxiao"
+date: "2021-04-21"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: readable
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Analysis of Spatial Coexistence and Neighbor Relationships in Trees Using Planar Graphs
+
+In the study of organisms that live in a sessile manner (such as various
+plants, corals, and sedentary mollusks), direct observations of their
+interaction behaviors are difficult. Therefore, the interaction
+relationships are often inferred from their distribution or spatial
+coexistence. In the case of woody plants, spatial coexistence typically
+considers the neighbor relationships between individual plants. However,
+previous studies have generally described the neighbors of an individual
+as all other individuals within a certain spatial range (Hubbell et al.,
+2001; Peters, 2003; Stoll and Newbery, 2005; Comita et al., 2010). This
+method is computationally simple and requires fewer resources, but its
+definition of neighbors is vague, and the selection of range is often
+based on experience rather than a rigorous mathematical foundation.
+
+To better define and analyze the spatial coexistence relationships of
+woody plants, we developed a method based on planar graphs to analyze
+neighbor relationships.
+
+## Step 1: Defining Neighbor Relationships in a Planar Graph
+
+Consider a set of points in a finite plane. Neighbor relationships are
+defined by the spatial proximity of the areas occupied by these points.
+Specifically, if the boundaries of the occupied areas of two points are
+adjacent, these two points are considered neighbors. Under this
+assumption, the neighbor relationship can be represented as a set of
+edges in the plane, where these edges do not intersect. In other words,
+the total neighbor relationships form a planar graph on the plane.
+
+## Step 2: Ensuring Complete Occupation in Subtropical Forests
+
+Considering that subtropical forests often have a high canopy density,
+we may assume that the occupation of the plane by the set of points is
+sufficiently complete. From this, we infer that the number of neighbor
+relationships between points should be maximized, ensuring that there
+are no disconnected edges on the plane that would meet the required
+conditions. This leads to the generation of a complete planar graph.
+
+## Step 3: Minimizing the Spatial Distance Between Neighboring Points
+
+Since we are focusing on spatial neighbor relationships, the goal is to
+find the nearest set of neighboring points such that the spatial
+distance between neighbors is minimized. Additionally, for any given
+point, its neighbors must form a polygon containing only that point.
+This necessitates the creation of a minimum complete planar graph.
+
+## Mathematical Constraints for the Planar Graph
+
+The graph $G(V, E)$ must satisfy the following mathematical constraints:
+
+1.  **Non-intersecting Edges:** $$
+    \forall e_i, e_j \in E, e_i \cap e_j = \emptyset
+    $$ This means that the edges $e_i$ and $e_j$ should not intersect.
+
+2.  **Minimization of Edge Length:** $$
+    \min \sum e_i \quad \text{for} \quad e_i \in E
+    $$ This minimizes the total length of the edges.
+
+3.  **Maximization of Vertex Degree:** $$
+    \max \sum \text{degree}(v_i) \quad \text{for} \quad v_i \in V
+    $$ This maximizes the degree of the vertices (i.e., the number of
+    edges connected to a vertex).
+
+Where: - $V$ and $E$ represent the set of vertices and edges of the
+graph $G$, - $\text{degree}(v_i)$ denotes the degree of the vertex
+$v_i$, which is the number of edges connected to that vertex.
+
+## Implementation in Woody Plant Distribution Data
+
+We implement this process in real-world woody plant distribution data
+using a global search approach. The process begins by generating a set
+of boundary points that define the sampling plot boundaries. This avoids
+incorrect neighbor relationships that might be formed due to boundary
+constraints. Using the individual location data, we compute the pairwise
+distances between all individuals in the sampling plot, thus
+constructing a distance matrix. This matrix represents a complete graph
+for the set of points, where the edges include all potential
+connections.
+
+Next, we create a set of neighbor relationships. To reduce computational
+complexity, we filter the edges within a specific distance range (5
+meters in this study) and sort them by distance. We then check each edge
+from smallest to largest to see if it intersects with any existing edges
+in the current neighbor relationship set. If it does not intersect, it
+is added to the set. This process continues until the complete set of
+neighbor relationships is generated.
+
+# Code (by 2022)
+
+```{r,eval=FALSE}
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("data.table")
+```
+
+```{r,eval=FALSE}
+# Construct neighbor web of trees 
+# By Chang Longxiao, 2019 
+
+# Read data, including real data and edges that are chosen
+data.final <- read.table("data.final.csv", header = TRUE, sep = ",", encoding = "UTF-8") 
+data.edge <- read.table("edge.final.csv", header = TRUE, sep = ",", encoding = "UTF-8") 
+names(data.final) <- c("I", "sp", "x", "y", "h", "DBH") 
+names(data.edge) <- c("I", "sp", "x", "y", "h", "DBH") 
+
+n <- length(table(data.final$I)) 
+
+# Divide data by site 
+data.list <- list() 
+for (i in 1:n) { 
+  data.sub <- subset(data.final, I == i) 
+  data.edge$h <- mean(data.sub$h) 
+  data.edge$DBH <- mean(data.sub$DBH) 
+  data.list[[i]] <- rbind(data.sub, data.edge) 
+} 
+
+# Generate the web and store by site 
+result.list <- list() 
+for (i in 1:n) { 
+  a <- as.data.frame(data.list[i])  
+  result.list[[i]] <- neibor.calculate(a, 5, weight = F) 
+} 
+
+# Function to generate neighbor network 
+neibor.calculate <- function(tree.plot, gapl, weight) { 
+  num <- length(tree.plot[, 1]) 
+  num.count <- length(tree.plot[tree.plot$I != 0, 1]) 
+  m.dis <- matrix(0, num, num) 
+  for (i in 1:num) { 
+    for (j in 1:num) { 
+      m.dis[i, j] <- sqrt((tree.plot$x[i] - tree.plot$x[j])^2 + (tree.plot$y[i] - tree.plot$y[j])^2) 
+      if (weight) 
+        m.dis[i, j] <- m.dis[i, j] / (tree.plot$DBH[i] + tree.plot$DBH[j]) 
+    } 
+  } 
+  
+  # Structure distance matrix
+  exis <- matrix(0, num, num) 
+  a <- 0 
+  for (i in 1:(num - 1)) { 
+    for (j in (i + 1):num) { 
+      if (m.dis[i, j] <= gapl) a <- a + 1 
+      else exis[i, j] <- -1 
+    } 
+  } 
+  
+  # Distances that match the gap 
+  while (a > 0) { 
+    p <- 1 
+    q <- 2 
+    l <- gapl 
+    for (i in 1:(num - 1)) { 
+      for (j in (i + 1):num) { 
+        if (exis[i, j] == 0 & m.dis[i, j] < l) { 
+          p <- i 
+          q <- j 
+          l <- m.dis[i, j] 
+        } 
+      } 
+    } 
+    print(l) 
+    
+    # Min distance now 
+    if (l == 0) exis[p, q] <- 1 
+    if (l > 0) { 
+      for (i in 1:(num - 1)) { 
+        if (i == p) next 
+        for (j in (i + 1):num) { 
+          if (j == q) next 
+          if (exis[i, j] == 1 & m.dis[i, j] > 0) { 
+            ij1 <- (tree.plot$x[j] - tree.plot$x[i]) * (tree.plot$y[p] - tree.plot$y[i]) - 
+              (tree.plot$y[j] - tree.plot$y[i]) * (tree.plot$x[p] - tree.plot$x[i]) 
+            ij2 <- (tree.plot$x[j] - tree.plot$x[i]) * (tree.plot$y[q] - tree.plot$y[i]) - 
+              (tree.plot$y[j] - tree.plot$y[i]) * (tree.plot$x[q] - tree.plot$x[i]) 
+            pq1 <- (tree.plot$x[q] - tree.plot$x[p]) * (tree.plot$y[i] - tree.plot$y[p]) - 
+              (tree.plot$y[q] - tree.plot$y[p]) * (tree.plot$x[i] - tree.plot$x[p]) 
+            pq2 <- (tree.plot$x[q] - tree.plot$x[p]) * (tree.plot$y[j] - tree.plot$y[p]) - 
+              (tree.plot$y[q] - tree.plot$y[p]) * (tree.plot$x[j] - tree.plot$x[p]) 
+            if (is.na(ij1 * ij2 < 0 & pq1 * pq2 < 0)) { 
+              exis[p, q] <- -1 
+              break 
+            } 
+            if (ij1 * ij2 < 0 & pq1 * pq2 < 0) { 
+              exis[p, q] <- -1 
+              break 
+            }  
+          } 
+        } 
+        if (exis[p, q] == -1) break 
+      } 
+      if (exis[p, q] == 0) exis[p, q] <- 1 
+    } 
+    a <- a - 1 
+    print(a) 
+  } 
+  
+  # Find edges of the graph 
+  for (i in 2:num) { 
+    for (j in 1:(i - 1)) { 
+      if (exis[j, i] == -1) exis[j, i] <- 0 
+      exis[i, j] <- exis[j, i] 
+    } 
+  } 
+  
+  # Fill the matrix 
+  result <- list(m.dis = m.dis[1:num.count, 1:num.count], exis = exis[1:num.count, 1:num.count]) 
+  return(result) 
+} 
+
+# Translate the neighborhood matrix into co-occurrence matrix 
+inter.list <- list() 
+for (i in 1:n) { 
+  inter.list[[i]] <- inter.frame(data.list[[i]], result.list[[i]]$exis, 45) 
+} 
+
+# Function to create the co-occurrence matrix 
+inter.frame <- function(sp.data, exis, sp.num) { 
+  inter.num <- sum(exis) / 2 
+  i.frame <- as.data.frame(matrix(0, inter.num, sp.num)) 
+  n <- length(sp.data[, 1]) - 88 
+  flag <- 1 
+  for (i in 1:(n - 1)) { 
+    for (j in (i + 1):n) { 
+      if (exis[i, j] == 1) { 
+        i.frame[flag, sp.data$sp[i]] <- 1 
+        i.frame[flag, sp.data$sp[j]] <- 1 
+        flag <- flag + 1 
+      } 
+    } 
+  } 
+  return(i.frame) 
+}
+```
