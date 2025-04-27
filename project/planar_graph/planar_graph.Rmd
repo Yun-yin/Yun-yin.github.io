@@ -1,5 +1,5 @@
 ---
-title: "planar_graph_forest"
+title: "Analysis of Spatial Coexistence and Neighbor Relationships in Forest Using Planar Graph Model"
 author: "Longxiao"
 date: "2021-04-21"
 output: 
@@ -17,18 +17,20 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Analysis of Spatial Coexistence and Neighbor Relationships in Trees Using Planar Graphs
-
 In the study of organisms that live in a sessile manner (such as various
 plants, corals, and sedentary mollusks), direct observations of their
 interaction behaviors are difficult. Therefore, the interaction
 relationships are often inferred from their distribution or spatial
-coexistence. In the case of woody plants, spatial coexistence typically
-considers the neighbor relationships between individual plants. However,
-previous studies have generally described the neighbors of an individual
-as all other individuals within a certain spatial range (Hubbell et al.,
-2001; Peters, 2003; Stoll and Newbery, 2005; Comita et al., 2010). This
-method is computationally simple and requires fewer resources, but its
+coexistence. For example, it is generally inferred that species
+exhibiting low co-occurrence tend to have strong competitive
+interactions, whereas those with frequent co-occurrence are likely to
+experience weak competition or engage in mutualistic interactions. In
+the case of woody plants, spatial coexistence typically considers the
+neighbor relationships between individual plants. However, previous
+studies have generally described the neighbors of an individual as all
+other individuals within a certain spatial range (Hubbell et al., 2001;
+Peters, 2003; Stoll and Newbery, 2005; Comita et al., 2010). This method
+is computationally simple and requires fewer resources, but its
 definition of neighbors is vague, and the selection of range is often
 based on experience rather than a rigorous mathematical foundation.
 
@@ -36,17 +38,81 @@ To better define and analyze the spatial coexistence relationships of
 woody plants, we developed a method based on planar graphs to analyze
 neighbor relationships.
 
-## Step 1: Defining Neighbor Relationships in a Planar Graph
+```{r, warning=FALSE, message=FALSE}
+#packages
+library(ggplot2)
+library(pheatmap)
+library(dplyr)
+library(deldir)
+```
 
-Consider a set of points in a finite plane. Neighbor relationships are
-defined by the spatial proximity of the areas occupied by these points.
-Specifically, if the boundaries of the occupied areas of two points are
-adjacent, these two points are considered neighbors. Under this
-assumption, the neighbor relationship can be represented as a set of
-edges in the plane, where these edges do not intersect. In other words,
-the total neighbor relationships form a planar graph on the plane.
+# Defining Neighbor Relationships in a Planar Graph
 
-## Step 2: Ensuring Complete Occupation in Subtropical Forests
+Consider a set of points in a finite plane, which represent the
+individuals in forest.
+
+```{r}
+# generate example: poisson distributed random points in 1*1 plane, set density as \rho.
+example_generator<-function(rho = 100, X = 1, Y = 1, seed = 123){
+  set.seed(seed)
+  # possion distributed points
+  n_poisson <- rpois(1, lambda = rho * X * Y)
+  poisson_points <- data.frame(
+    x = runif(n_poisson, 0, X),
+    y = runif(n_poisson, 0, Y),
+    type = "sample"
+    )
+  return(poisson_points)
+}
+```
+
+```{r}
+rho = 100
+X = 1
+Y = 1
+seed = 123
+
+tree_sample <- example_generator()
+
+#visualization
+p1 <- ggplot(tree_sample, aes(x, y)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  coord_fixed() +
+  ggtitle("simulated tree individuals in a spot")+
+  theme_minimal()
+
+p1
+```
+
+We propose the following model: each individual is associated with a
+neighborhood centered on itself, with neighborhoods of different
+individuals being non-overlapping. Furthermore, the union of all these
+neighborhoods completely covers the sampling area. In other words, these
+neighborhoods form a partition of the sampling region.
+
+```{r, echo=FALSE}
+voronoi <- deldir(tree_sample$x, tree_sample$y)
+
+voronoi_edges <- voronoi$dirsgs
+
+ggplot() +
+  geom_segment(data = voronoi_edges, 
+               aes(x = x1, y = y1, xend = x2, yend = y2), 
+               color = "darkgreen", alpha = 0.6) +
+  geom_point(data = tree_sample, aes(x = x, y = y), color = "blue", alpha = 0.6) +
+  coord_fixed() +
+  theme_minimal() +
+  ggtitle("Neighborhoods of Sample Points")
+```
+
+Neighbor relationships are defined by the spatial proximity of the
+neighborhoods. Specifically, if the neighborhoods of two points are
+adjacent, these two points are considered neighbors. In this model, the
+neighbor relationship can be represented as a set of edges in the plane,
+where these edges do not intersect. In other words, the total neighbor
+relationships form a planar graph.
+
+# Complete Occupation in Subtropical Forests
 
 Considering that subtropical forests often have a high canopy density,
 we may assume that the occupation of the plane by the set of points is
@@ -55,7 +121,7 @@ relationships between points should be maximized, ensuring that there
 are no disconnected edges on the plane that would meet the required
 conditions. This leads to the generation of a complete planar graph.
 
-## Step 3: Minimizing the Spatial Distance Between Neighboring Points
+# Minimizing the Spatial Distance Between Neighboring Points
 
 Since we are focusing on spatial neighbor relationships, the goal is to
 find the nearest set of neighboring points such that the spatial
@@ -63,9 +129,10 @@ distance between neighbors is minimized. Additionally, for any given
 point, its neighbors must form a polygon containing only that point.
 This necessitates the creation of a minimum complete planar graph.
 
-## Mathematical Constraints for the Planar Graph
+# Mathematical Constraints for the Planar Graph $G(V, E)$
 
-The graph $G(V, E)$ must satisfy the following mathematical constraints:
+As state above, the graph $G(V, E)$ must satisfy the following
+mathematical constraints:
 
 1.  **Non-intersecting Edges:** $$
     \forall e_i, e_j \in E, e_i \cap e_j = \emptyset
@@ -84,27 +151,286 @@ Where: - $V$ and $E$ represent the set of vertices and edges of the
 graph $G$, - $\text{degree}(v_i)$ denotes the degree of the vertex
 $v_i$, which is the number of edges connected to that vertex.
 
-## Implementation in Woody Plant Distribution Data
+# The Algorithm Used to Implement the Model
 
 We implement this process in real-world woody plant distribution data
-using a global search approach. The process begins by generating a set
-of boundary points that define the sampling plot boundaries. This avoids
-incorrect neighbor relationships that might be formed due to boundary
-constraints. Using the individual location data, we compute the pairwise
-distances between all individuals in the sampling plot, thus
-constructing a distance matrix. This matrix represents a complete graph
-for the set of points, where the edges include all potential
-connections.
+(here illustrated with the example generated above) using a global
+search approach. The process begins by generating a set of boundary
+points that define the sampling plot boundaries. This avoids incorrect
+neighbor relationships that might be formed due to boundary constraints.
+
+```{r}
+boundary_generator <- function(rho = 100, X = 1, Y = 1){
+  # average distance scale
+  avg_dist <- sqrt(X * Y / rho)
+  
+  # boundary area
+  x_seq <- seq(-avg_dist, X + avg_dist, by = avg_dist)
+  y_seq <- seq(-avg_dist, Y + avg_dist, by = avg_dist)
+  
+  boundary_x <- expand.grid(
+    x = x_seq, y = c(-avg_dist, Y + avg_dist))
+  boundary_y <- expand.grid(
+    x = c(-avg_dist, X + avg_dist), y = y_seq)
+  
+  boundary_points <- rbind(boundary_x, boundary_y)
+  boundary_points <- unique(boundary_points)
+  boundary_points$type <- "boundary"
+  
+  return(boundary_points)
+}
+```
+
+```{r}
+boundary <- boundary_generator()
+sample_data <- rbind(tree_sample,boundary)
+
+p2 <- ggplot(sample_data, aes(x, y, color = type)) +
+  geom_point(alpha = 0.6) +
+  scale_color_manual(values = c("boundary" = "red", "sample" = "blue"))+
+  coord_fixed() +
+  ggtitle("Sample Points and Boundary Points") +
+  theme_minimal()
+
+p2
+```
+
+```{r,echo=FALSE}
+voronoi <- deldir(sample_data$x, sample_data$y)
+
+voronoi_edges <- voronoi$dirsgs
+
+ggplot() +
+  geom_segment(data = voronoi_edges, 
+               aes(x = x1, y = y1, xend = x2, yend = y2), 
+               color = "darkgreen", alpha = 0.6) +
+  geom_point(data = sample_data, aes(x = x, y = y, color = type), alpha = 0.6) +
+  scale_color_manual(values = c("boundary" = "red", "sample" = "blue"))+
+  coord_fixed() +
+  theme_minimal() +
+  ggtitle("Neighborhoods with boundary points")
+```
+
+Using the individual location data, we compute the pairwise distances
+between all individuals in the sampling plot, thus constructing a
+distance matrix. This matrix represents a complete graph for the set of
+points, where the edges include all potential connections.
+
+```{r}
+#calculate distance matrix
+dist_generator <- function(all_points){
+  #distance matrix
+  dist_matrix <- as.matrix(dist(all_points[, c("x", "y")]))
+  #lower part
+  lower_idx <- which(lower.tri(dist_matrix), arr.ind = TRUE)
+  
+  #translate to a dataframe
+  distance_df <- data.frame(
+    i = lower_idx[, 1],
+    j = lower_idx[, 2],
+    distance = dist_matrix[lower_idx]
+    )
+  return(distance_df)
+}
+```
+
+```{r}
+distance_df <- dist_generator(sample_data)
+ggplot(distance_df, aes(x = i, y = j, fill = distance)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma") +
+  coord_fixed() +
+  theme_minimal() +
+  ggtitle("Distance Matrix Heatmap")
+```
 
 Next, we create a set of neighbor relationships. To reduce computational
-complexity, we filter the edges within a specific distance range (5
-meters in this study) and sort them by distance. We then check each edge
-from smallest to largest to see if it intersects with any existing edges
-in the current neighbor relationship set. If it does not intersect, it
-is added to the set. This process continues until the complete set of
-neighbor relationships is generated.
+complexity, we filter the edges within a specific distance range (for
+example, 3 or 4 times of the average distance) and sort them by
+distance.
 
-# Code (by 2022)
+```{r}
+# sort and preprocess distance dataframe
+dist_sort <- function(distance_df, max_dist){
+  distance_df <- distance_df %>%
+  filter(distance < max_dist) %>%
+  arrange(distance)
+  return(distance_df)
+}
+```
+
+```{r}
+avg_dist <- sqrt(X * Y / rho)
+distance_df_sort <- dist_sort(distance_df, 4*avg_dist)
+
+ggplot(distance_df_sort, aes(x = i, y = j, fill = distance)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma") +
+  coord_fixed() +
+  theme_minimal() +
+  ggtitle("Distance Matrix Heatmap")
+```
+
+We then check each edge from smallest to largest to see if it intersects
+with any existing edges in the current neighbor relationship set. If it
+does not intersect, it is added to the set. This process continues until
+the complete set of neighbor relationships is generated.
+
+```{r}
+# examine intersect with both end of the edge
+is_intersect <- function(p1, p2, q1, q2) {
+  cross <- function(p, q, r) {
+    (q$x - p$x) * (r$y - p$y) - (q$y - p$y) * (r$x - p$x)
+  }
+  
+  (cross(p1, p2, q1) * cross(p1, p2, q2) < 0) &&
+  (cross(q1, q2, p1) * cross(q1, q2, p2) < 0)
+}
+```
+
+```{r}
+neighbor_generator <- function(all_points, distance_df_sort){
+  
+  selected_edges <- data.frame(i = integer(), j = integer(), distance = double())
+
+  for (k in 1:nrow(distance_df_sort)) {
+    i <- distance_df_sort$i[k]
+    j <- distance_df_sort$j[k]
+    d <- distance_df_sort$distance[k]
+  
+    p1 <- all_points[i, c("x", "y")]
+    p2 <- all_points[j, c("x", "y")]
+  
+    has_intersection <- FALSE
+    if (nrow(selected_edges) > 0) {
+      for (l in 1:nrow(selected_edges)) {
+        i_exist <- selected_edges$i[l]
+        j_exist <- selected_edges$j[l]
+      
+        q1 <- all_points[i_exist, c("x", "y")]
+        q2 <- all_points[j_exist, c("x", "y")]
+      
+        if (is_intersect(p1, p2, q1, q2)) {
+          has_intersection <- TRUE
+          break
+        }
+      }
+    }
+  
+    if (d == 0 || !has_intersection) {
+      selected_edges <- rbind(selected_edges, data.frame(i = i, j = j, distance = d))
+    }
+  }
+  
+  return(selected_edges)
+}
+```
+
+```{r}
+edges_data <- neighbor_generator(sample_data,distance_df_sort)
+head(edges_data)
+```
+
+```{r}
+# both ends of the edges
+edges_ends <- edges_data %>%
+  rowwise() %>%
+  mutate(x1 = sample_data$x[i], y1 = sample_data$y[i], x2 = sample_data$x[j], y2 = sample_data$y[j])
+
+p3<-ggplot() +
+  geom_segment(data = edges_ends, aes(x = x1, y = y1, xend = x2, yend = y2), color = "darkgray", linewidth = 0.5, alpha = 0.7) +
+  geom_point(data = sample_data, aes(x = x, y = y, color = type), alpha = 0.6) +
+  scale_color_manual(values = c("boundary" = "red", "sample" = "blue"))+
+  ggtitle("Final Network of Selected Segments") +
+  theme_minimal() +
+  coord_fixed()
+
+p3
+```
+
+Then, we delete boundary points and edges related to boundary, the final
+result contains all coexistence pairs.
+
+```{r}
+# delete boundary points
+edges_no_boundary <- edges_data %>%
+  filter(i %in% rownames(tree_sample) & j %in% rownames(tree_sample))
+
+edges_end_no_boundary <- edges_no_boundary %>%
+  rowwise() %>%
+  mutate(x1 = tree_sample$x[as.numeric(i)], y1 = tree_sample$y[as.numeric(i)],
+         x2 = tree_sample$x[as.numeric(j)], y2 = tree_sample$y[as.numeric(j)])
+
+p4<-ggplot() +
+  geom_segment(data = edges_end_no_boundary, aes(x = x1, y = y1, xend = x2, yend = y2), color = "darkgray", linewidth = 0.5, alpha = 0.7) +
+  geom_point(data = tree_sample, aes(x = x, y = y), color = "blue", size = 2, alpha = 0.7) +
+  ggtitle("Network") +
+  theme_minimal() +
+  coord_fixed()
+
+p4
+```
+
+And we could inferring the interaction strength as well as interaction
+networks accordingly.
+
+# Discussion
+
+The algorithm we implemented here follows a greedy approach. However,
+when the number of individuals increases significantly, this global
+algorithm becomes inefficient and time-consuming. To enhance its
+performance, several improvements can be considered:
+
+-   Divide the area into smaller patches: This can help by reducing the
+    problem size in each patch, making the computation more manageable.
+
+-   Utilize spatial indexing techniques: When the area is extremely
+    large, spatial index methods can speed up the process by quickly
+    identifying relevant regions.
+
+-   Limit the number of final edges: By setting a constraint on the
+    maximum number of edges, we can avoid considering distant edges that
+    are unnecessary. In a complete planar graph, it can be proven that
+    the number of edges is bounded by $3n−3$, where $n$ is the number of
+    points.
+
+Additionally, another more efficient approach is Delaunay triangulation,
+which is significantly faster than the method we used here. Delaunay
+triangulation represents the dual graph of a Voronoi diagram and
+provides a more computationally efficient way to connect the points.
+
+```{r}
+delaunay_result <- deldir(sample_data$x, sample_data$y)
+
+delaunay_edges <- delaunay_result$delsgs
+
+ggplot() +
+  geom_segment(data = delaunay_edges, 
+               aes(x = x1, y = y1, xend = x2, yend = y2), 
+               color = "darkgray", linewidth = 0.5) +
+  geom_point(data = sample_data, aes(x = x, y = y, color = type), alpha = 0.6) +
+  scale_color_manual(values = c("boundary" = "red", "sample" = "blue"))+
+  coord_fixed() +
+  theme_minimal() +
+  ggtitle("Delaunay Triangulation")
+```
+
+> I became acquainted with the Voronoi graph only after completing this
+> work; otherwise, I would have opted to use it from the outset.
+> Delaunay triangulation, however, doesn’t seem to perfectly align with
+> our model in some respects. While I have not yet fully clarified the
+> exact differences between them, it is clear that they sometimes
+> produce different edges.
+>
+> Additionally, (to make this work appear at least somewhat meaningful),
+> the algorithm we developed can be easily extended to accommodate
+> various other conditions. For instance, if we assume that the area of
+> an individual’s neighborhood is related to its biomass (which could be
+> measured by height or DBH), we can adapt our method accordingly. In
+> such cases, the only modification needed would be to adjust how we
+> calculate the distance, such as by dividing it by the height.
+
+# Previous Code (by 2022)
 
 ```{r,eval=FALSE}
 install.packages("dplyr")
