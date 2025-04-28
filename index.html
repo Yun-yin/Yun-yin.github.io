@@ -1,137 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chang Longxiao - Academic Profile</title>
-    <style>
-        /* Base Styles */
-        :root {
-            --bg-color: #fefefe;
-            --text-color: #333;
-            --link-color: #2484c1;
-            --border-color: #ddd;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Longxiao</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #333;
+      background: #fff;
+      display: flex;
+      min-height: 100vh;
+    }
+    nav {
+      width: 220px;
+      background: #f5f5f5;
+      padding: 2rem 1rem;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      border-right: 1px solid #ddd;
+    }
+    nav h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+    }
+    nav ul li {
+      margin: 1rem 0;
+    }
+    nav a {
+      color: #4183C4;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .content {
+      margin-left: 240px;
+      padding: 3rem 4rem;
+      max-width: 900px;
+    }
+    h1, h2 {
+      font-weight: bold;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: 3em;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.3rem;
+    }
+    p {
+      margin: 1rem 0;
+      line-height: 1.6;
+    }
+    blockquote {
+      margin: 2rem auto;
+      padding: 0;
+      border: none;
+      color: #666;
+      text-align: center;
+      max-width: 600px;
+    }
 
-        body {
-            font-family: "Open Sans", sans-serif;
-            line-height: 1.7;
-            color: var(--text-color);
-            background: var(--bg-color);
-            margin: 0 auto;
-            max-width: 800px;
-            padding: 60px 100px;
-        }
+    a {
+      color: #4183C4;
+      text-decoration: none;
+    }
 
-        /* Content Structure */
-        #write {
-            margin: 0 auto;
-            padding: 40px 0;
-        }
-
-        /* Headings */
-        h1, h2, h3 {
-            text-align: center;
-            font-weight: normal;
-            margin: 0.5em 0;
-            font-family: "Vollkorn", Palatino, Times;
-        }
-
-        h1 { font-size: 3rem; }
-        h2 { font-size: 2rem; }
-        h3 { font-size: 1.6rem; font-style: italic; }
-
-        h2::after {
-            content: '';
-            display: block;
-            width: 100px;
-            border-bottom: 1px solid var(--text-color);
-            margin: 0.5em auto;
-        }
-
-        /* Content Sections */
-        section {
-            margin: 0.5em 0;
-            padding: 0.2em 0;
-        }
-
-        /* Lists & Paragraphs */
-        ul, ol {
-            padding-left: 1.5em;
-            margin: 1em 0;
-        }
-
-        p, li {
-            margin: 1.2em 0;
-        }
-
-        /* Links & Interactive */
-        a {
-            color: var(--link-color);
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive Design */
-
-        @media (max-width: 768px) {
-            body {
-                padding: 30px 25px;
-                font-size: 0.95rem;
-                max-width: 100%;
-            }
-
-            h1 { font-size: 2.5rem; }
-            h2 { font-size: 1.8rem; }
-        }
-
-        @media (min-width: 1600px) {
-            body {
-                padding: 60px 20%;
-            }
-        }
-
-        @media print {
-            body {
-                font-size: 12pt;
-                line-height: 1.4;
-            }
-            
-            a::after {
-                content: " (" attr(href) ")";
-                font-size: 0.8em;
-            }
-        }
-
-        /* Specific Component Styling */
-        .publication-link {
-            display: block;
-            margin: 0.5em 0;
-        }
-
-        .date-range {
-            float: right;
-            color: #666;
-        }
-
-        .skill-category {
-            margin: 1.5em 0;
-        }
-
-        .flex-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin: 0.5em 0;
-            font-size: 1.2em;
-            font-family: "Vollkorn", Palatino, Times;
-        }
-
-        .contact-block {
-            text-align: center;
+    .contact-block {
             font-size: 0.8em;
             line-height: 1.4;
             color: #555;
@@ -140,161 +92,54 @@
             font-family: "Open Sans", sans-serif;
         }
 
-        .contact-block a {
-            color: var(--link-color);
-            text-decoration: none;
-        }
+    .contact-block a {
+        color: var(--link-color);
+        text-decoration: none;
+    }
 
-        .contact-block a:hover {
-            text-decoration: underline;
-        }
-
-    </style>
+    .contact-block a:hover {
+        text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-    <div id="write">
-        <header>
-            <h1><center>Chang Longxiao</center></h1>
-            <div class="contact-block">
-                <p>Master's program of <strong><span>E</span></strong>volution <strong><span>E</span></strong>cology and <strong><span>S</span></strong>ystematics</p>
-                <p>Faculty of Biology · Ludwig-Maximilians-Universität München</p>
-                <p><a href="mailto:Longxiao.Chang@campus.lmu.de">Longxiao.Chang@campus.lmu.de</a></p>
-            </div>            
-        </header>
 
-        <section id="education">
-            <h2>Education Background</h2>
-            <p class="flex-row">
-                <em><strong>Ludwig-Maximilians-Universität München, Munich, Germany</strong></em>
-                <span>September 2023 -- present</span>
-            </p>
-            <p><span> Master&#39;s program in Ecology, Evolution and Systematics</span></p>
+  <nav>
+    <h2><span>CLX</span></h2>
+    <ul>
+      <li><a href="#cv">CV</a></li>
+      <li><a href="#interest">Interest Area</a></li>
+      <li><a href="#works">Interesting Works</a></li>
+    </ul>
+  </nav>
 
-            <p class="flex-row">
-                <em><strong>Zhejiang University, Zhejiang, China</strong></em>
-                <span>October 2018 -- June 2022</span>
-            </p>
-            <p><span>College of Life Science </span><span>&amp;</span><span> Chu Kochen Honors College</span></p>
-            <p><span>B.S. in Biological Sciences, Pursuit Science Class, GPA 3.86/4.00, Ranking 3/16</span></p>
-        </section>
+  <div class="content">
+    <header>
+      <h1>Chang Longxiao</h1>
+      <div class="contact-block">
+          <p>Master's program of <strong><span>E</span></strong>volution <strong><span>E</span></strong>cology and <strong><span>S</span></strong>ystematics</p>
+          <p>Faculty of Biology · Ludwig-Maximilians-Universität München</p>
+          <p><a href="mailto:Longxiao.Chang@campus.lmu.de">Longxiao.Chang@campus.lmu.de</a></p>
+      </div>            
+    </header>
 
-        <section id="research">
-            <h2>Research Experience</h2>
+    <blockquote>
+      Per aspera ad astra
+    </blockquote>
 
-            <p class="flex-row">
-                <em><strong>Ludwig-Maximilians-Universität München, Munich, Germany</strong></em>
-                <span>Oct. 2024 -- present</span>
-            </p>
-            <p><em><span>The Dynamics of Structural Stability in Modularly Designed Laboratory Plankton Communities -- supervisor: Dr. Maria Stockenreiter</span></em></p>
-            <ul>
-                <li><p><span>We use laboratory-controlled planktonic communities to systematically examine structural stability and refine models of community structure dynamics.</span></p></li>
-                <li><p><span>By inferring interaction strengths from population size time series, we aim to compare and evaluate the structure of interaction networks and assess their structural stability under different community dynamics and species compositions.</span></p></li>
-            </ul>
+    <h2 id="cv">CV</h2>
+    <p>Find my CV <a href="CV/index.html">here</a>.</p>
 
-            <p class="flex-row">
-                <em><strong>Ludwig-Maximilians-Universität München, Munich, Germany</strong></em>
-                <span>Oct. 2023 -- June 2024</span>
-            </p>
-            <p><em><span>A Continuous Model of Hybrid Zone Dominated by Assortative Mating -- supervisor: Prof. Dirk Metzler</span></em></p>
-            <ul>
-                <li><p><span>Developed an advanced tension zone model incorporating assortative mating as a sexual selection term</span></p></li>
-                <li><p><span>Investigated conditions for the maintenance and boundaries of clines</span></p></li>
-                <li><p><span>Modeled and predicted the genetic dynamics of European crow populations using a continuous model</span></p></li>
-            </ul>
+    <h2 id="interest">Interests</h2>
+    <p><span>Community ecology &amp; theoretical ecology (species interaction network, biodiversity pattern, stability of community, biogeography)</span></p>
+  <p><span>Complex system (self-organization, chaos, emergence, complex network) </span></p>
 
-            <p class="flex-row">
-                <em><strong>Zhejiang University, Zhejiang, China</strong></em>
-                <span>Research Assistant, Sep. 2022 -- Oct. 2023</span>
-            </p>
-            <p><span>Conducted a study on the species interaction network in the Thousand-Island Lake, work together with Dr. Zhu Chen</span></p>
-            <ul>
-                <li><p><span>A study on the structure stability and nestedness of species interaction network</span></p></li>
-                <li><p><a href='https://doi.org/10.1073/pnas.2415846122'><span>Interconnecting fragmented forests: Small and mobile birds are cornerstones in the plant-frugivore meta-network</span></a></p></li>
-            </ul>
+    <h2 id="works">Some Interesting Works</h2>
+    <p><a href="project/bifurcation/index.html"><span>A demonstration of logistic mapping and period-doubling bifurcations</span></a></p>
+    <p><a href="project/popgen_simulation/index.html"><span>A simulation of coalescent in Wright-Fisher model and Moran model</span></a></p>
+    <p><a href="project/PCA/index.html"><span>A brief introduction and demonstration of PCA</span></a></p>
+    <p><a href="project/2D_coalescent/index.html"><span>An illustration of Barton's coalescent model with dispersal population in plane</span></a></p>
+  </div>
 
-            <p class="flex-row">
-                <em><strong>China Academy of Art, Zhejiang, China</strong></em>
-                <span>Consultant in Biology, Oct. 2022 -- Oct. 2023</span>
-            </p>
-            <p><span>Design on an imaginary device as a metaphor of future with recycling material, work together with Dr. Ma Chuan</span></p>
-            <ul>
-                <li><p><span>Designing a possible way to use fungus in digesting woodworks </span></p></li>
-                <li><p><span>Cultivating sample of wood rot fungi </span></p></li>
-            </ul>
-
-            <p class="flex-row">
-                <em><strong>Zhejiang University, Zhejiang, China</strong></em>
-                <span>team leader, Sep. 2021 -- June 2022</span>
-            </p>
-            <ul>
-                <li><p><span>Investigated the stability maintenance mechanisms of plant species interaction networks in fragmented habitats</span></p></li>
-                <li><p><span>Bachler&#39;s Thesis and research exercise project in Chu Kochen Honors college</span></p></li>
-            </ul>
-
-            <p class="flex-row">
-                <em><strong>Zhejiang University, Zhejiang, China</strong></em>
-                <span>team leader, Mar. 2020 -- May 2021</span>
-            </p>
-            <p><em><span>The Pattern and Formation Mechanism of the Plant Metacommunity in the Thousand Island Lake Region</span></em></p>
-            <ul>
-                <li><p><span>Undergraduate student provincial innovative research project</span></p></li>
-                <li><p><span>Modeled tree interaction networks using generated planar complete graphs</span></p></li>
-                <li><p><a href="project/planar_graph/index.html"><span>Description of using planar complete graphs to model forest neighborhood relation</span></a></p></li>
-            </ul>
-
-            <p class="flex-row">
-                <em><strong>Zhejiang University, Zhejiang, China</strong></em>
-                <span>team leader, Mar. 2019 -- May 2019</span>
-            </p>
-            <ul>
-                <li><p><span>Analyzed growth rate differences between genders of ginkgo on ZJU campus</span></p></li>
-            </ul>
-        </section>
-
-        <section id="Some presentations and project of mine">
-            <h2>Some presentations and project of mine</h2>
-            <p><a href="project/bifurcation/index.html"><span>A demonstration of logistic mapping and period-doubling bifurcations</span></a></p>
-            <p><a href="project/popgen_simulation/index.html"><span>A simulation of coalescent in Wright-Fisher model and Moran model</span></a></p>
-            <p><a href="project/PCA/index.html"><span>A brief introduction and demonstration of PCA</span></a></p>
-            <p><a href="project/2D_coalescent/index.html"><span>An illustration of Barton's coalescent model with dispersal population in plane</span></a></p>
-        </section>
-
-        <section id="interests">
-            <h2>Interests</h2>
-            <p><span>Community ecology &amp; theoretical ecology (species interaction network, biodiversity pattern, stability of community, biogeography)</span></p>
-            <p><span>Complex system (self-organization, chaos, emergence, complex network) </span></p>
-        </section>
-
-        <section id="activities-experiences">
-            <h2>Activities Experiences</h2>
-            <p class="flex-row">
-                <em><strong>ZJU Campus Plant, Zhejiang University, Zhejiang, China</strong></em>
-                <span>Sep. 2018 -- June 2022</span>
-            </p>
-            <ul>
-                <li><p><span>student club about botany, horticulture and taxonomy </span></p></li>
-                <li><p><span>write popular science article about plant and culture </span></p></li>
-                <li><p><span>operated ZJU Campus Plant, the WeChat official account of our club as editor-in-chief in 2020 </span></p></li>
-            </ul>
-        </section>
-
-        <section id="honors--awards">
-            <h2>Honors &amp; Awards</h2>
-            <ul>
-                <li><p><span>ZJU Academic Excellent Student ×3, Zhejiang University, 2019-2021   </span></p></li>
-                <li><p><span>ZJU Second-class scholarship ×2, Zhejiang University, 2020-2021  </span></p></li>
-                <li><p><span>ZJU Third-class scholarship, Zhejiang University, 2019  </span></p></li>
-                <li><p><span>Second-class scholarship for outstanding undergraduate students in basic science, China, 2020  </span></p></li>
-                <li><p><span>Chu Kochen Honors degree, Zhejiang University, 2022</span></p></li>
-            </ul>
-        </section>
-        
-        <section id="skills">
-            <h2>Skills</h2>
-            <p><span>Basic abilities of ecology field work and identifing the family or genus of normal plants, as well as the order of general mammals, birds and insects. </span></p>
-            <p><span>Using C, python and R programming language to do some basic statistical work and process simulation.</span></p>
-            <p><span>Set up normal mathematical modeling about ecology as well as evolution system.</span></p>
-        </section>
-    </div>
 </body>
 </html>
