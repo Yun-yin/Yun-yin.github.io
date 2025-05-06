@@ -149,6 +149,45 @@
             text-decoration: underline;
         }
 
+        .course-dropdown {
+            margin: 1rem 0;
+        }
+        .course-toggle {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            font-size: 1rem;
+            color: inherit;
+        }
+        .course-toggle span {
+            margin-left: 0.3rem;
+            font-size: 0.8rem;
+        }
+        .course-toggle:hover {
+            text-decoration: underline;
+        }
+        .course-list {
+            display: none;
+            margin-top: 0.2rem;
+            margin-bottom: 0.2rem; 
+            padding: 0.5rem 1rem;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .course-list ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .course-list li {
+            padding: 0.1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .course-list li:last-child {
+            border-bottom: none;
+        }
+
     </style>
 </head>
 <body>
@@ -169,6 +208,19 @@
                 <span>September 2023 -- present</span>
             </p>
             <p><span> Master&#39;s program in Ecology, Evolution and Systematics</span></p>
+            <div class="course-dropdown">
+                <div class="course-toggle" data-target="LMU" onclick="toggleDropdown(this)">
+                    <span>▶</span> Relevant Coursework
+                </div>
+                <div class="course-list" id="LMU">
+                    <ul>
+                        <li>Evolutionary Genetics, Evolutionary Ecology, Systematic Data and Evidence</li>
+                        <li>Computational Methods in Evolutionary Biology: phylogenetics, population genetics</li>
+                        <li>Statitics and Mathematical fundamentals for ecology and evolutionary biology</li>
+                        <li>Applications of Machine Learning in Biology, An Introduction to R</li>
+                    </ul>
+                </div>
+            </div>
 
             <p class="flex-row">
                 <em><strong>Zhejiang University, Zhejiang, China</strong></em>
@@ -176,10 +228,36 @@
             </p>
             <p><span>College of Life Science </span><span>&amp;</span><span> Chu Kochen Honors College</span></p>
             <p><span>B.S. in Biological Sciences, Pursuit Science Class, GPA 3.86/4.00, Ranking 3/16</span></p>
+
+            <div class="course-dropdown">
+                <div class="course-toggle" data-target="ZJU" onclick="toggleDropdown(this)">
+                    <span>▶</span> Relevant Coursework 
+                </div>
+                <div class="course-list" id="ZJU">
+                    <ul>
+                        <li><strong><span>Biology:</span></strong>
+                            Botany, Zoology, Biochemistry, Molecular Biology, Cell Biology, Genetics, Developmental biology, Neuroscience, Evolutionary Biology, Ecology, Biostatistics and Experiment Design, Conservation Biology, Ecosystem Ecology, Biogeography
+                        </li>
+                        <li><strong><span>Mathematic:</span></strong>
+                            Calculus (H) (Ⅰ,Ⅱ,Ⅲ), Linear Algebra, Probability Theory & Mathematical Statistics, Stochastic Processes, Complex Variable Functions & Integral Transformation, Discrete Mathematics and Application, Mathematical Modeling 
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </section>
 
         <section id="research">
             <h2>Research Experience</h2>
+
+            <p class="flex-row">
+                <em><strong></strong></em>
+                <span>Jan. 2025 -- present</span>
+            </p>
+            <p><em><span>Bifurcation Analysis of Light-Dependent Forest Structure, work together with Dr. Yu Kailiang</span></em></p>
+            <ul>
+                <li><p><span>Developed a differential equation model describing two-layer forest dynamics, where seedling, lower, and top layer transitions depend on light availability</span></p></li>
+                <li><p><span>Analyzed system bifurcations; identified ranges of light conditions supporting bistability between top-layer- and lower-layer-dominated states</span></p></li>
+            </ul>
 
             <p class="flex-row">
                 <em><strong>Ludwig-Maximilians-Universität München, Munich, Germany</strong></em>
@@ -197,18 +275,18 @@
             </p>
             <p><em><span>A Continuous Model of Hybrid Zone Dominated by Assortative Mating -- supervisor: Prof. Dirk Metzler</span></em></p>
             <ul>
-                <li><p><span>Developed an advanced tension zone model incorporating assortative mating as a sexual selection term</span></p></li>
-                <li><p><span>Investigated conditions for the maintenance and boundaries of clines</span></p></li>
-                <li><p><span>Modeled and predicted the genetic dynamics of European crow populations using a continuous model</span></p></li>
+                <li><p><span>Developed an advanced tension zone model integrating assortative mating as a sexual selection term</span></p></li>
+                <li><p><span>Showed that with assortative mating at a single locus, the model reduces to a classic reaction-diffusion form; derived a traveling wave solution with some approximation; investigated conditions for the maintenance and boundaries of clines</span></p></li>
+                <li><p><span>Showed that genetic predictions of the continuous model for European crow populations align with discrete model results</span></p></li>
             </ul>
 
             <p class="flex-row">
                 <em><strong>Zhejiang University, Zhejiang, China</strong></em>
                 <span>Research Assistant, Sep. 2022 -- Oct. 2023</span>
             </p>
-            <p><span>Conducted a study on the species interaction network in the Thousand-Island Lake, work together with Dr. Zhu Chen</span></p>
+            <p><em><span>Stability and structure of the plant-frugivore network in the Thousand-Island Lake, work together with Dr. Zhu Chen</span></em></p>
             <ul>
-                <li><p><span>A study on the structure stability and nestedness of species interaction network</span></p></li>
+                <li><p><span>A study on the relation between structure stability and network structure (nestedness, modularity) of plant-frugivore network</span></p></li>
                 <li><p><a href='https://doi.org/10.1073/pnas.2415846122'><span>Interconnecting fragmented forests: Small and mobile birds are cornerstones in the plant-frugivore meta-network</span></a></p></li>
             </ul>
 
@@ -216,7 +294,7 @@
                 <em><strong>China Academy of Art, Zhejiang, China</strong></em>
                 <span>Consultant in Biology, Oct. 2022 -- Oct. 2023</span>
             </p>
-            <p><span>Design on an imaginary device as a metaphor of future with recycling material, work together with Dr. Ma Chuan</span></p>
+            <p><em><span>Design on an imaginary device as a metaphor of future with recycling material, work together with Dr. Ma Chuan</span></em></p>
             <ul>
                 <li><p><span>Designing a possible way to use fungus in digesting woodworks </span></p></li>
                 <li><p><span>Cultivating sample of wood rot fungi </span></p></li>
@@ -226,28 +304,33 @@
                 <em><strong>Zhejiang University, Zhejiang, China</strong></em>
                 <span>team leader, Sep. 2021 -- June 2022</span>
             </p>
+            <p><em><span>Species abundance and the structure of interaction network affect the structural stability of forest meta-community -- supervisor: Prof. Yu Mingjian</span></em></p>
             <ul>
-                <li><p><span>Investigated the stability maintenance mechanisms of plant species interaction networks in fragmented habitats</span></p></li>
                 <li><p><span>Bachler&#39;s Thesis and research exercise project in Chu Kochen Honors college</span></p></li>
+                <li><p><span>Generated neighborhood relationships using a complete planar graph model; inferred interaction strengths via maximum likelihood under a Markov random field framework</span></p></li>
+                <li><p><span>Calculated species abundance and structural stability in metacommunity patches, following the Lotka-Volterra model (using linear approximation near equilibrium); applied resampling and null models to assess random effects</span></p></li>
+                <li><p><span>Found that interaction networks comprising all interacting species in a patch show higher structural stability, while subsets display lower stability, consistent with predictions from structural stability theory</span></p></li>
             </ul>
 
             <p class="flex-row">
                 <em><strong>Zhejiang University, Zhejiang, China</strong></em>
                 <span>team leader, Mar. 2020 -- May 2021</span>
             </p>
-            <p><em><span>The Pattern and Formation Mechanism of the Plant Metacommunity in the Thousand Island Lake Region</span></em></p>
+            <p><em><span>The Pattern and Formation Mechanism of Neighborhood Relationships in Plant Metacommunities, Thousand Island Lake Region -- supervisor: Prof. Yu Mingjian</span></em></p>
             <ul>
                 <li><p><span>Undergraduate student provincial innovative research project</span></p></li>
-                <li><p><span>Modeled tree interaction networks using generated planar complete graphs</span></p></li>
-                <li><p><a href="project/planar_graph/index.html"><span>Description of using planar complete graphs to model forest neighborhood relation</span></a></p></li>
+                <li><p><span>Developed a model to map neighborhood and interaction networks using complete planar graphs</span></p></li>
+                <li><p><span>Here is a short illustration:</span><a href="project/planar_graph/index.html"><span>Description of using complete planar graphs to model forest neighborhood relation</span></a></p></li>
             </ul>
 
             <p class="flex-row">
                 <em><strong>Zhejiang University, Zhejiang, China</strong></em>
                 <span>team leader, Mar. 2019 -- May 2019</span>
             </p>
+            <p><em><span>Survey of Reproductive Timing and Growth in Ginkgo biloba -- supervisor: Prof. Zhao Yunpeng</span></em></p>
             <ul>
-                <li><p><span>Analyzed growth rate differences between genders of ginkgo on ZJU campus</span></p></li>
+                <li><p><span>Surveyed flowering phenology, DBH, height, and growth rate of ~1,000 ginkgo (<em><span>Ginkgo biloba</span></em>) trees on Zhejiang University campus.</span></p></li>
+                <li><p><span>Identified significant gender differences in ginkgo reproductive phenology, with male strobili emerging earlier than female strobili, shedding light on reproductive strategies in gymnosperms.</span></p></li>
             </ul>
         </section>
 
@@ -296,5 +379,17 @@
             <p><span>Set up normal mathematical modeling about ecology as well as evolution system.</span></p>
         </section>
     </div>
+
+    <script>
+        function toggleDropdown(element) {
+            const targetId = element.dataset.target;
+            const list = document.getElementById(targetId);
+            const span = element.querySelector('span');
+            const isHidden = list.style.display === 'none' || list.style.display === '';
+    
+            list.style.display = isHidden ? 'block' : 'none';
+            span.textContent = isHidden ? '▼' : '▶';
+        }
+    </script>
 </body>
 </html>
