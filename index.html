@@ -26,6 +26,7 @@
       left: 0;
       overflow-y: auto;
       border-right: 1px solid #ddd;
+      transition: transform 0.3s ease;
     }
     nav h2 {
       font-size: 1.2rem;
@@ -83,6 +84,21 @@
       text-decoration: none;
     }
 
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      background: #4183C4;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      z-index: 1000;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
     .contact-block {
             font-size: 0.8em;
             line-height: 1.4;
@@ -99,6 +115,31 @@
 
     .contact-block a:hover {
         text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        transform: translateX(-100%);
+      }
+      nav.open {
+        transform: translateX(0);
+      }
+      .menu-toggle {
+        display: block;
+      }
+      body.nav-open {
+        overflow: hidden;
+      }
+    }
+
+    main {
+      margin-left: 220px;
+      padding: 1rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        margin-left: 0;
+      }
     }
   </style>
 </head>
@@ -134,7 +175,7 @@
     <p><span>Community ecology &amp; theoretical ecology (species interaction network, biodiversity pattern, stability of community, biogeography)</span></p>
   <p><span>Complex system (self-organization, chaos, emergence, complex network) </span></p>
 
-    <h2 id="works">Some Interesting Works</h2>
+    <h2 id="works">Some Interesting Illustrations</h2>
     <p><a href="project/bifurcation/index.html"><span>A demonstration of logistic mapping and period-doubling bifurcations</span></a></p>
     <p><a href="project/popgen_simulation/index.html"><span>A simulation of coalescent in Wright-Fisher model and Moran model</span></a></p>
     <p><a href="project/PCA/index.html"><span>A brief introduction and demonstration of PCA</span></a></p>
