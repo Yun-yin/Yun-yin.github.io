@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+}
+
+#sidebar {
+    width: 200px;
+    background: #f5f5f5;
+    padding: 20px;
+}
+
+#content {
+    flex: 1;
+}
+
+#home {
+    padding: 40px;
+    max-width: 1000px;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="sidebar">
+    <h3>Content</h3>
+    <ul>
+        <li><a href="#" onclick="showHome()">Gene_noise_network</a></li>
+        <li><a href="#" onclick="loadPage('Instability_Large_Network.nb.html')">Why large random gene regulatory network be instable?</a></li>
+        <li><a href="#" onclick="loadPage('generate_stable_topos.nb.html')">Generate stable networks by sampling the eigenvalues</a></li>
+        <li><a href="#" onclick="loadPage('Mat_analysis.nb.html')">Simulation result of network evolution</a></li>
+    </ul>
+</div>
+
+<div id="content">
+
+    <div id="home">
+        <h1>Evolution of Gene Regulatory Network Structures Driven by Expression Noise</h1>
+
+        <p>
+            This is an Individual Research Training in LMU, EES program.
+        </p>
+        <p>Chang, Longxiao</p>
+        <p>Supervised by Prof. Dr. Dirk Metzler</p>
+
+        <h2>Abstract</h2>
+        <ul>
+            <li>Gene expression is a finely regulated but inherently stochastic process that is essential for cellular function and phenotypic variation. Gene regulatory networks (GRNs) provide a framework for modeling the interactions that control gene expression. Although expression noise can influence fitness and is shaped by natural selection, how selection acting on gene expression levels shapes GRN structure and dynamics remains unclear.</li>
+            <li>Here, we developed a simplified evolutionary model to simulate the evolution of gene regulatory networks under intrinsic noise. In our framework, intrinsic noise was held constant, while mutations occurred in the regulatory strength of an initially stable network. Selection favored networks that maintained lower expression noise under a given level of intrinsic stochasticity. We quantified global structural properties using nestedness and modularity, but neither showed a consistent association with expression noise. Instead, we found that reduced expression noise was strongly associated with a smaller spectral radius of the regulatory matrix, indicating enhanced dynamical stability. The results suggest that natural selection acting on gene expression levels may primarily shape dynamical properties rather than global net work topology, highlighting the importance of spectral characteristics in the evolutionary optimization of regulatory networks.</li>
+        </ul>
+    </div>
+
+    <iframe
+        id="viewer"
+        style="display:none;width:100%;height:100%;border:none">
+    </iframe>
+
+</div>
+
+<script>
+
+function loadPage(page) {
+
+    document.getElementById("home").style.display = "none";
+
+    const viewer = document.getElementById("viewer");
+    viewer.style.display = "block";
+    viewer.src = page;
+}
+
+function showHome() {
+
+    document.getElementById("viewer").style.display = "none";
+    document.getElementById("home").style.display = "block";
+}
+
+</script>
+
+</body>
+</html>
